@@ -14,7 +14,7 @@ class Demo(Application):
 
 if __name__ == "__main__":
     app = Demo(version=8)
-    artifactPath = "artifactsA/"
+    artifactPath = "artifactsB/"
     if os.path.exists("./"+artifactPath+"approval.teal"):
         os.remove("./"+artifactPath+"approval.teal")
  
