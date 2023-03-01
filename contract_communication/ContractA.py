@@ -6,7 +6,7 @@ from typing import Final
  
 APP_CREATOR = Seq(creator := AppParam.creator(Int(0)), creator.value())
  
-class Demo(Application):
+class DemoA(Application):
  
     global_counter: Final[ApplicationStateValue] = ApplicationStateValue(stack_type=TealType.uint64, default=Int(0))
     winning_call_number: Final[ApplicationStateValue] = ApplicationStateValue(stack_type=TealType.uint64, default=Int(5))
@@ -15,13 +15,12 @@ class Demo(Application):
     def create(self):
         return self.initialize_application_state()
     
-    @external
-    def getGlobalCounter(self,*,output:abi.Uint64):
-        return output.set(self.global_counter.get())
+    # @internal
+    # def is_odd(self,val:abi.Uint64):
     
     @internal 
     def winner(self, acct: abi.Address):
-            return self.global_counter.set(self.global_counter.get()+Int(5))
+        return self.global_counter.set(self.global_counter.get()+Int(5))
     
     @internal
     def increaseCounter(self, acct: abi.Address):
@@ -30,15 +29,41 @@ class Demo(Application):
                   self.global_counter.set(self.global_counter.get()+Int(1)))
     
     @external
+    def getGlobalCounter(self,*,output:abi.Uint64):
+        return output.set(self.global_counter.get())
+    
+    # https://forum.algorand.org/t/calling-function-of-another-contract-in-current-contract/7571
+    @external
     def add(self, num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
         return Seq(
-             self.increaseCounter(Txn.sender()),
-             output.set(num1.get()+num2.get())
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.ApplicationCall,
+                TxnField.application_id: Int(3),
+                TxnField.on_completion: OnComplete.NoOp,
+                TxnField.application_args: [Bytes("add"), Int(num1.get()), Int(num2.get())]
+            }),
+            InnerTxnBuilder.Submit()
         )
+
+    @external
+    def sub(self, num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
+        return Seq(
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.ApplicationCall,
+                TxnField.application_id: Int(3),
+                TxnField.on_completion: OnComplete.NoOp,
+                TxnField.application_args: [Bytes("sub"), Int(num1.get()), Int(num2.get())]
+            }),
+            InnerTxnBuilder.Submit()
+        )
+
+    
             
 
 if __name__ == "__main__":
-    app = Demo(version=8)
+    app = DemoA(version=8)
     artifactPath = "artifactsA/"
     if os.path.exists("./"+artifactPath+"approval.teal"):
         os.remove("./"+artifactPath+"approval.teal")

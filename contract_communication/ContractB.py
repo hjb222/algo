@@ -6,14 +6,25 @@ from typing import Final
  
 APP_CREATOR = Seq(creator := AppParam.creator(Int(0)), creator.value())
  
-class Demo(Application):
+class DemoB(Application):
  
     @create
     def create(self):
         return self.initialize_application_state()
+    
+    # @external
+    # def add(self, num1: abi.Uint64, num2: abi.Uint64):
+    
+
+    # @external
+    # def sub(self, num1: abi.Uint64, num2: abi.Uint64):
+
+    # @external
+    # def pay(self, acct:abi.Uint64):
+        
 
 if __name__ == "__main__":
-    app = Demo(version=8)
+    app = DemoB(version=8)
     artifactPath = "artifactsB/"
     if os.path.exists("./"+artifactPath+"approval.teal"):
         os.remove("./"+artifactPath+"approval.teal")
