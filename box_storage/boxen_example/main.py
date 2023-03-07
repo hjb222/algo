@@ -5,6 +5,7 @@ from algosdk.transaction import AssetOptInTxn, PaymentTxn
 
 from beaker import client, consts, sandbox
 from application import (
+    MembershipRecord,
      membership_club_app
 )
 

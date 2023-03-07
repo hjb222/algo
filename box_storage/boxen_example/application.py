@@ -75,7 +75,7 @@ membership_club_app = Application(
 
 @membership_club_app.external()
 def putToBox(self, k: abi.Uint64, v: abi.Uint64):
-    return membership_club_app.state.boxes[k.get()].set(v.get())
+    return Pop(membership_club_app.state.boxes[k.get()].set(v.get()))
 
 @membership_club_app.external(authorize=Authorize.only(Global.creator_address()))
 def getFromBox(self, k: abi.Uint64, *, output: abi.Uint64) -> Expr:
