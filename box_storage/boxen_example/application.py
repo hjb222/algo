@@ -98,7 +98,7 @@ def make_a_box(new_member: abi.Account):
 @membership_club_app.external()
 def read_box(member: abi.Address,*,output:abi.String):
     # membership_club_app.state.membership_records[new_member.address()].set(mr)
-    return membership_club_app.state.testboxes[member].store_into(output)
+    return output.set(membership_club_app.state.testboxes[member].get())
 
 def increment_global():
     return membership_club_app.state.global_counter.set(membership_club_app.state.global_counter + Int(1))

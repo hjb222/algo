@@ -12,18 +12,18 @@ from application import (
 record_codec = ABIType.from_string(str(MembershipRecord().type_spec()))
 
 
-affirmations = [
-    "I am successful.",
-    "I am confident.",
-    "I am powerful.",
-    "I am strong.",
-    "I am getting better and better every day.",
-    "All I need is within me right now.",
-    "I wake up motivated.",
-    "I am an unstoppable force of nature.",
-    "I am a living, breathing example of motivation.",
-    "All I need is GM.",
-]
+# affirmations = [
+#     "I am successful.",
+#     "I am confident.",
+#     "I am powerful.",
+#     "I am strong.",
+#     "I am getting better and better every day.",
+#     "All I need is within me right now.",
+#     "I wake up motivated.",
+#     "I am an unstoppable force of nature.",
+#     "I am a living, breathing example of motivation.",
+#     "All I need is GM.",
+# ]
 
 
 # def print_boxes(app_client: client.ApplicationClient) -> None:
@@ -79,7 +79,8 @@ def demo() -> None:
         suggested_params=sp,
         boxes=[(app_client.app_id, decode_address(member_acct.address))]
     )
-
+    boxes = app_client.get_box_names()
+    print(f"{len(boxes)} boxes found")
     result = app_client.call(
         "read_box",
         member=member_acct.address,
@@ -97,22 +98,22 @@ def demo() -> None:
 
 
 
-    # result = app_client.call(
-    #     "get_global_inc"
-    # )
+    result = app_client.call(
+        "get_global_inc"
+    )
 
     # print(result.return_value)
 
-    # app_client.call(
-    #     "set_global_inc",
-    #     val=5
-    #     )
+    app_client.call(
+        "set_global_inc",
+        val=5
+        )
 
-    # result = app_client.call(
-    #     "get_global_inc"
-    # )
+    result = app_client.call(
+        "get_global_inc"
+    )
 
-    # print(result.return_value)
+    print(result.return_value)
 
     ##
     # Add Member to club
