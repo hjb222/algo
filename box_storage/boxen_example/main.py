@@ -49,15 +49,21 @@ def demo() -> None:
     print("Creating app")
     app_client.create()
 
-    app_client.call(
-        "putToBox",
-        k=10,
-        v=20
-    )
+
 
     result = app_client.call(
-        "getFromBox",
-        k=10
+        "get_global_inc"
+    )
+
+    print(result.return_value)
+
+    app_client.call(
+        "set_global_inc",
+        val=5
+        )
+
+    result = app_client.call(
+        "get_global_inc"
     )
 
     print(result.return_value)

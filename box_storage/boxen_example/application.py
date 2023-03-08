@@ -25,6 +25,7 @@ from beaker import (
     Application,
     Authorize,
     GlobalStateValue,
+    LocalStateValue,
     consts,
     unconditional_create_approval,
 )
