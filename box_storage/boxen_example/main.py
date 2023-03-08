@@ -51,18 +51,41 @@ def demo() -> None:
 
     sp = app_client.get_suggested_params()
 
+     ##
+    # Bootstrap Club app
+    ##
+    print("Bootstrapping app")
+    sp = app_client.get_suggested_params()
+    sp.flat_fee = True
+    sp.fee = 2000
+    ptxn = PaymentTxn(
+        acct.address,
+        sp,
+        app_client.app_addr,
+        99999999
+    )
+    result = app_client.call(
+        "bootstrap",
+        seed=TransactionWithSigner(ptxn, acct.signer),
+        token_name="fight club",
+        boxes=[(app_client.app_id, "affirmations")] * 8,
+    )
+    membership_token = result.return_value
+    print(f"Created asset id: {membership_token}")
+
     app_client.call(
         "make_a_box",
-        key="larbydoo",
+        new_member=member_acct.address,
         suggested_params=sp,
-        boxes=[(app_client.app_id,"larbydoo")]
+        boxes=[(app_client.app_id, decode_address(member_acct.address))]
     )
 
     result = app_client.call(
         "read_box",
-        key="larbydoo"
+        member=member_acct.address,
+        boxes=[(app_client.app_id, decode_address(member_acct.address))],
     )
-
+    
     print(result.return_value)
   # # Add member account as member
     # app_client.call(
@@ -90,28 +113,6 @@ def demo() -> None:
     # )
 
     # print(result.return_value)
-
-    # ##
-    # # Bootstrap Club app
-    # ##
-    # print("Bootstrapping app")
-    # sp = app_client.get_suggested_params()
-    # sp.flat_fee = True
-    # sp.fee = 2000
-    # ptxn = PaymentTxn(
-    #     acct.address,
-    #     sp,
-    #     app_client.app_addr,
-    #     membership_club_app.state.minimum_balance.value,
-    # )
-    # result = app_client.call(
-    #     "bootstrap",
-    #     seed=TransactionWithSigner(ptxn, acct.signer),
-    #     token_name="fight club",
-    #     boxes=[(app_client.app_id, "affirmations")] * 8,
-    # )
-    # membership_token = result.return_value
-    # print(f"Created asset id: {membership_token}")
 
     ##
     # Add Member to club
