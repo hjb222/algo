@@ -72,6 +72,7 @@ class MembershipClubState:
         # Only static types can provide information about the max
         # size (and thus min balance required) - dynamic types will fail at abi.size_of
         self.membership_records = BoxMapping(abi.Address, record_type)
+        self.testboxes = BoxMapping(abi.String,abi.Uint64)
         # Math for determining min balance based on expected size of boxes
         self.max_members = Int(max_members)
 
@@ -88,6 +89,16 @@ def get_global_inc(*, output: abi.Uint64) -> Expr:
 @membership_club_app.external()
 def set_global_inc(val: abi.Uint64) -> Expr:
     return membership_club_app.state.global_counter.set(val.get())
+
+@membership_club_app.external()
+def make_a_box(key: abi.String):
+    # membership_club_app.state.membership_records[new_member.address()].set(mr)
+    return membership_club_app.state.testboxes[key].set(Bytes("hello"))
+
+@membership_club_app.external()
+def read_box(key: abi.String,*,output:abi.String):
+    # membership_club_app.state.membership_records[new_member.address()].set(mr)
+    return membership_club_app.state.testboxes[key].store_into(output)
 
 def increment_global():
     return membership_club_app.state.global_counter.set(membership_club_app.state.global_counter + Int(1))

@@ -49,24 +49,47 @@ def demo() -> None:
     print("Creating app")
     app_client.create()
 
-
-
-    result = app_client.call(
-        "get_global_inc"
-    )
-
-    print(result.return_value)
+    sp = app_client.get_suggested_params()
 
     app_client.call(
-        "set_global_inc",
-        val=5
-        )
+        "make_a_box",
+        key="larbydoo",
+        suggested_params=sp,
+        boxes=[(app_client.app_id,"larbydoo")]
+    )
 
     result = app_client.call(
-        "get_global_inc"
+        "read_box",
+        key="larbydoo"
     )
 
     print(result.return_value)
+  # # Add member account as member
+    # app_client.call(
+    #     "add_member",
+    #     new_member=member_acct.address,
+    #     suggested_params=sp,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))],
+    # )
+
+
+
+    # result = app_client.call(
+    #     "get_global_inc"
+    # )
+
+    # print(result.return_value)
+
+    # app_client.call(
+    #     "set_global_inc",
+    #     val=5
+    #     )
+
+    # result = app_client.call(
+    #     "get_global_inc"
+    # )
+
+    # print(result.return_value)
 
     # ##
     # # Bootstrap Club app
