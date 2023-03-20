@@ -90,16 +90,6 @@ def get_global_inc(*, output: abi.Uint64) -> Expr:
 def set_global_inc(val: abi.Uint64) -> Expr:
     return membership_club_app.state.global_counter.set(val.get())
 
-@membership_club_app.external()
-def make_a_box(new_member: abi.String):
-    # membership_club_app.state.membership_records[new_member.address()].set(mr)
-    return membership_club_app.state.testboxes[new_member.get()].set(Bytes("55"))
-
-@membership_club_app.external()
-def read_box(member: abi.String,*,output:abi.String):
-    # membership_club_app.state.membership_records[new_member.address()].set(mr)
-    return output.set(membership_club_app.state.testboxes[member.get()].get())
-
 def increment_global():
     return membership_club_app.state.global_counter.set(membership_club_app.state.global_counter + Int(1))
 
@@ -108,6 +98,42 @@ def increment_global():
 
 def get_local():
     return membership_club_app.state.local_counter
+
+@membership_club_app.external()
+def make_a_box(new_member: abi.String, value: abi.String):
+    return membership_club_app.state.testboxes[new_member.get()].set(value.get())
+
+@membership_club_app.external()
+def read_box(member: abi.String,*,output:abi.String):
+    return output.set(membership_club_app.state.testboxes[member.get()].get())
+
+@membership_club_app.external()
+def set_box(member: abi.String, value: abi.String):
+    return membership_club_app.state.testboxes[member.get()].set(value.get())
+
+# def increment_helper(split):
+#     for x in range(0, len(split)):
+#             if split[x] == "Int":
+#                 print("HEYYEYEYYEYEYEYYEYEYEYE" + (split[x+1]+1))
+#                 return split[x+1] + 1
+
+@membership_club_app.external()
+def increment_local_box(member: abi.String,*,output:abi.String):
+    output.set(membership_club_app.state.testboxes[member.get()].get())
+    string = str(output.get())
+    print(string)
+    print()
+    split = string.split('Int ')
+    print(split)
+    number = 4
+    for x in range(0, len(split)):
+        if split[x] == "Int":
+            print("here")
+            number = split[x+1] + 1
+            break
+    back_to_str = str(number)
+    return membership_club_app.state.testboxes[member.get()].set(Bytes(back_to_str))
+
 
 # # @opt_in
 # # def opt_in(self):

@@ -76,20 +76,52 @@ def demo() -> None:
     app_client.call(
         "make_a_box",
         new_member="foo",
+        value="3",
         suggested_params=sp,
         boxes=[(app_client.app_id, "foo")]
     )
     boxes = app_client.get_box_names()
     print(f"{len(boxes)} boxes found")
+
+
+    result = app_client.call(
+        "read_box",
+        member="foo",
+        boxes=[(app_client.app_id, "foo")],
+    )
+    
+    print(int(str(result.return_value)))
+
+    app_client.call(
+        "set_box",
+        member="foo",
+        value="2",
+        suggested_params=sp,
+        boxes=[(app_client.app_id, "foo")]
+    )
+
     result = app_client.call(
         "read_box",
         member="foo",
         boxes=[(app_client.app_id, "foo")],
     )
 
-    x = int(result.return_value)
-    
-    print(x)
+    print(int(str(result.return_value)))
+
+    app_client.call(
+        "increment_local_box",
+        member="foo",
+        suggested_params=sp,
+        boxes=[(app_client.app_id, "foo")]
+    )
+
+    result = app_client.call(
+        "read_box",
+        member="foo",
+        boxes=[(app_client.app_id, "foo")],
+    )
+
+    print(int(str(result.return_value)))
   # # Add member account as member
     # app_client.call(
     #     "add_member",
@@ -100,22 +132,22 @@ def demo() -> None:
 
 
 
-    result = app_client.call(
-        "get_global_inc"
-    )
+    # result = app_client.call(
+    #     "get_global_inc"
+    # )
+
+    # # print(result.return_value)
+
+    # app_client.call(
+    #     "set_global_inc",
+    #     val=5
+    #     )
+
+    # result = app_client.call(
+    #     "get_global_inc"
+    # )
 
     # print(result.return_value)
-
-    app_client.call(
-        "set_global_inc",
-        val=5
-        )
-
-    result = app_client.call(
-        "get_global_inc"
-    )
-
-    print(result.return_value)
 
     ##
     # Add Member to club
