@@ -75,16 +75,16 @@ def demo() -> None:
 
     app_client.call(
         "make_a_box",
-        new_member=member_acct.address,
+        new_member="foo",
         suggested_params=sp,
-        boxes=[(app_client.app_id, decode_address(member_acct.address))]
+        boxes=[(app_client.app_id, "foo")]
     )
     boxes = app_client.get_box_names()
     print(f"{len(boxes)} boxes found")
     result = app_client.call(
         "read_box",
-        member=member_acct.address,
-        boxes=[(app_client.app_id, decode_address(member_acct.address))],
+        member="foo",
+        boxes=[(app_client.app_id, "foo")],
     )
     
     print(result.return_value)
