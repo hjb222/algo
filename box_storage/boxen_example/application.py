@@ -93,7 +93,7 @@ def set_global_inc(val: abi.Uint64) -> Expr:
 @membership_club_app.external()
 def make_a_box(new_member: abi.String):
     # membership_club_app.state.membership_records[new_member.address()].set(mr)
-    return membership_club_app.state.testboxes[new_member.get()].set(Bytes("myvalue"))
+    return membership_club_app.state.testboxes[new_member.get()].set(Bytes("55"))
 
 @membership_club_app.external()
 def read_box(member: abi.String,*,output:abi.String):

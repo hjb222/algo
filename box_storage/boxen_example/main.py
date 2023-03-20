@@ -86,8 +86,10 @@ def demo() -> None:
         member="foo",
         boxes=[(app_client.app_id, "foo")],
     )
+
+    x = int(result.return_value)
     
-    print(result.return_value)
+    print(x)
   # # Add member account as member
     # app_client.call(
     #     "add_member",
