@@ -122,6 +122,21 @@ def demo() -> None:
     )
 
     print(int(str(result.return_value)))
+
+    app_client.call(
+        "decrement_local_box",
+        member="foo",
+        suggested_params=sp,
+        boxes=[(app_client.app_id, "foo")]
+    )
+
+    result = app_client.call(
+        "read_box",
+        member="foo",
+        boxes=[(app_client.app_id, "foo")],
+    )
+
+    print(int(str(result.return_value)))
   # # Add member account as member
     # app_client.call(
     #     "add_member",

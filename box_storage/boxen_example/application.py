@@ -111,25 +111,30 @@ def read_box(member: abi.String,*,output:abi.String):
 def set_box(member: abi.String, value: abi.String):
     return membership_club_app.state.testboxes[member.get()].set(value.get())
 
-# def increment_helper(split):
-#     for x in range(0, len(split)):
-#             if split[x] == "Int":
-#                 print("HEYYEYEYYEYEYEYYEYEYEYE" + (split[x+1]+1))
-#                 return split[x+1] + 1
-
 @membership_club_app.external()
 def increment_local_box(member: abi.String,*,output:abi.String):
     output.set(membership_club_app.state.testboxes[member.get()].get())
     string = str(output.get())
-    print(string)
-    print()
-    split = string.split('Int ')
-    print(split)
-    number = 4
+    split = string.split()
+    number = 0
     for x in range(0, len(split)):
-        if split[x] == "Int":
-            print("here")
-            number = split[x+1] + 1
+        if split[x] == "(Int":
+            number = int(split[x+1][0]) + 1
+            print("numer incrember: " + str(number))
+            break
+    back_to_str = str(number)
+    return membership_club_app.state.testboxes[member.get()].set(Bytes(back_to_str))
+
+@membership_club_app.external()
+def decrement_local_box(member: abi.String,*,output:abi.String):
+    output.set(membership_club_app.state.testboxes[member.get()].get())
+    string = str(output.get())
+    split = string.split()
+    number = 0
+    for x in range(0, len(split)):
+        if split[x] == "(Int":
+            number = int(split[x+1][0]) - 1
+            print("numer decrement: " + str(number))
             break
     back_to_str = str(number)
     return membership_club_app.state.testboxes[member.get()].set(Bytes(back_to_str))
