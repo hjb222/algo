@@ -72,7 +72,8 @@ class MembershipClubState:
         # Only static types can provide information about the max
         # size (and thus min balance required) - dynamic types will fail at abi.size_of
         self.membership_records = BoxMapping(abi.Address, record_type)
-        self.testboxes = BoxMapping(abi.String, abi.String)
+        self.local_boxes = BoxMapping(abi.Address, abi.String)
+        self.global_boxes = BoxMapping(abi.String, abi.String)
         # Math for determining min balance based on expected size of boxes
         self.max_members = Int(max_members)
 
@@ -100,90 +101,117 @@ def get_local():
     return membership_club_app.state.local_counter
 
 @membership_club_app.external()
-def make_a_box(new_member: abi.String, value: abi.String):
-    return membership_club_app.state.testboxes[new_member.get()].set(value.get())
+def make_global_box(new_member: abi.String, value: abi.String):
+    return membership_club_app.state.global_boxes[new_member.get()].set(value.get())
 
 @membership_club_app.external()
-def read_box(member: abi.String,*,output:abi.String):
-    return output.set(membership_club_app.state.testboxes[member.get()].get())
+def make_local_box(new_member: abi.Account, value: abi.String):
+    return membership_club_app.state.local_boxes[new_member.address()].set(value.get())
 
 @membership_club_app.external()
-def set_box(member: abi.String, value: abi.String):
-    return membership_club_app.state.testboxes[member.get()].set(value.get())
+def read_global_box(member: abi.String, *,output:abi.String):
+    return output.set(membership_club_app.state.global_boxes[member.get()].get())
 
 @membership_club_app.external()
-def increment_local_box(member: abi.String,*,output:abi.String):
-    output.set(membership_club_app.state.testboxes[member.get()].get())
+def read_local_box(member: abi.Address, *, output:abi.String):
+    return output.set(membership_club_app.state.global_boxes[member.get()].get())
+
+@membership_club_app.external()
+def set_global_box(member: abi.String, value: abi.String):
+    return membership_club_app.state.global_boxes[member.get()].set(value.get())
+
+@membership_club_app.external()
+def set_local_box(member: abi.Address, value: abi.String):
+    return membership_club_app.state.global_boxes[member.get()].set(value.get())
+
+@membership_club_app.external()
+def increment_global_box(member: abi.String,*,output:abi.String):
+    output.set(membership_club_app.state.global_boxes[member.get()].get())
     string = str(output.get())
     split = string.split()
     number = 0
     for x in range(0, len(split)):
         if split[x] == "(Int":
             number = int(split[x+1][0]) + 1
-            print("numer incrember: " + str(number))
             break
     back_to_str = str(number)
-    return membership_club_app.state.testboxes[member.get()].set(Bytes(back_to_str))
+    return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))
 
 @membership_club_app.external()
-def decrement_local_box(member: abi.String,*,output:abi.String):
-    output.set(membership_club_app.state.testboxes[member.get()].get())
+def decrement_global_box(member: abi.String,*,output:abi.String):
+    output.set(membership_club_app.state.global_boxes[member.get()].get())
     string = str(output.get())
     split = string.split()
     number = 0
     for x in range(0, len(split)):
         if split[x] == "(Int":
             number = int(split[x+1][0]) - 1
-            print("numer decrement: " + str(number))
             break
     back_to_str = str(number)
-    return membership_club_app.state.testboxes[member.get()].set(Bytes(back_to_str))
-
-
-# # @opt_in
-# # def opt_in(self):
-# #     return Seq(self.initialize_account_state(), App.localPut(Txn.sender(), Bytes("local_counter"), Int(0)))
-
-# # @external
-# # def is_opted_in(self, *, output: abi.Uint64):
-# #     return output.set(App.optedIn(Txn.sender(), Txn.application_id()))
+    return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))
 
 @membership_club_app.external()
-def increment_local(*, output: abi.Uint64) -> Expr:
-    return Seq(
-        membership_club_app.state.local_counter.set(membership_club_app.state.local_counter + Int(1)),
-        increment_global(),
-        output.set(get_local())
-    )
+def increment_local_box(member: abi.Address,*,output:abi.String):
+    output.set(membership_club_app.state.global_boxes[member.get()].get())
+    string = str(output.get())
+    split = string.split()
+    number = 0
+    for x in range(0, len(split)):
+        if split[x] == "(Int":
+            number = int(split[x+1][0]) + 1
+            break
+    back_to_str = str(number)
+    return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))
 
 @membership_club_app.external()
-def decrement_local(*, output: abi.Uint64) -> Expr:
-    return Seq(
-        membership_club_app.state.local_counter.set(membership_club_app.state.local_counter - Int(1)),
-        increment_global(),
-        output.set(get_local())
-    )
+def decrement_local_box(member: abi.Address,*,output:abi.String):
+    output.set(membership_club_app.state.global_boxes[member.get()].get())
+    string = str(output.get())
+    split = string.split()
+    number = 0
+    for x in range(0, len(split)):
+        if split[x] == "(Int":
+            number = int(split[x+1][0]) - 1
+            break
+    back_to_str = str(number)
+    return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))
 
-@membership_club_app.external()
-def local_set(val: abi.Uint64) -> Expr:
-    return Seq(
-        membership_club_app.state.local_counter.set(val.get()),
-        increment_global()
-        )
+# @membership_club_app.external()
+# def increment_local(*, output: abi.Uint64) -> Expr:
+#     return Seq(
+#         membership_club_app.state.local_counter.set(membership_club_app.state.local_counter + Int(1)),
+#         increment_global(),
+#         output.set(get_local())
+#     )
 
-@membership_club_app.external()
-def local_get(*, output: abi.Uint64) -> Expr:
-    return Seq(
-        output.set(get_local()),
-        increment_global()
-    )
+# @membership_club_app.external()
+# def decrement_local(*, output: abi.Uint64) -> Expr:
+#     return Seq(
+#         membership_club_app.state.local_counter.set(membership_club_app.state.local_counter - Int(1)),
+#         increment_global(),
+#         output.set(get_local())
+#     )
 
-@membership_club_app.external()
-def local_delete(*, output: abi.String) -> Expr:
-    return Seq(
-        membership_club_app.state.local_counter.delete(),
-        output.set(Bytes("success"))
-    )
+# @membership_club_app.external()
+# def local_set(val: abi.Uint64) -> Expr:
+#     return Seq(
+#         membership_club_app.state.local_counter.set(val.get()),
+#         increment_global()
+#         )
+
+# @membership_club_app.external()
+# def local_get(*, output: abi.Uint64) -> Expr:
+#     return Seq(
+#         output.set(get_local()),
+#         increment_global()
+#     )
+
+# @membership_club_app.external()
+# def local_delete(*, output: abi.String) -> Expr:
+#     return Seq(
+#         membership_club_app.state.local_counter.delete(),
+#         output.set(Bytes("success"))
+#     )
 
 
 @membership_club_app.external(authorize=Authorize.only(Global.creator_address()))
