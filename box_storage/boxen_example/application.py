@@ -126,16 +126,17 @@ def set_local_box(member: abi.Address, value: abi.String):
 
 @membership_club_app.external()
 def increment_global_box(member: abi.String,*,output:abi.String):
-    output.set(membership_club_app.state.global_boxes[member.get()].get())
-    string = str(output.get())
-    split = string.split()
-    number = 0
-    for x in range(0, len(split)):
-        if split[x] == "(Int":
-            number = int(split[x+1][0]) + 1
-            break
-    back_to_str = str(number)
-    return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))
+    return membership_club_app.box_extract(Bytes("global_counter"), Int(4), Int(5))
+    # output.set(membership_club_app.state.global_boxes[member.get()].get())
+    # string = str(output.get())
+    # split = string.split()
+    # number = 0
+    # for x in range(0, len(split)):
+    #     if split[x] == "(Int":
+    #         number = int(split[x+1][0]) + 1
+    #         break
+    # back_to_str = str(number)
+    # return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))
 
 @membership_club_app.external()
 def decrement_global_box(member: abi.String,*,output:abi.String):
@@ -158,7 +159,9 @@ def increment_local_box(member: abi.Address,*,output:abi.String):
     number = 0
     for x in range(0, len(split)):
         if split[x] == "(Int":
+            print("before change"+str(int(split[x+1][0])))
             number = int(split[x+1][0]) + 1
+            print("after change"+str(number))
             break
     back_to_str = str(number)
     return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))

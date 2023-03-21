@@ -2,7 +2,7 @@ from algosdk.abi import ABIType
 from algosdk.atomic_transaction_composer import TransactionWithSigner
 from algosdk.encoding import decode_address, encode_address
 from algosdk.transaction import AssetOptInTxn, PaymentTxn
-
+from beaker import *
 from beaker import client, consts, sandbox
 from application import (
     MembershipRecord,
@@ -126,7 +126,7 @@ def demo() -> None:
     app_client.call(
         "make_local_box",
         new_member=member_acct.address,
-        value="1",
+        value="0",
         suggested_params=sp,
         boxes=[(app_client.app_id, decode_address(member_acct.address))]
     )
@@ -145,7 +145,7 @@ def demo() -> None:
     app_client.call(
         "set_local_box",
         member=member_acct.address,
-        value="2",
+        value="3",
         suggested_params=sp,
         boxes=[(app_client.app_id, decode_address(member_acct.address))]
     )
@@ -160,6 +160,21 @@ def demo() -> None:
 
     app_client.call(
         "increment_local_box",
+        member=member_acct.address,
+        suggested_params=sp,
+        boxes=[(app_client.app_id, decode_address(member_acct.address))]
+    )
+
+    result = app_client.call(
+        "read_local_box",
+        member=member_acct.address,
+        boxes=[(app_client.app_id, decode_address(member_acct.address))],
+    )
+
+    print("Local Counter:" + str(result.return_value))
+
+    app_client.call(
+        "decrement_local_box",
         member=member_acct.address,
         suggested_params=sp,
         boxes=[(app_client.app_id, decode_address(member_acct.address))]
