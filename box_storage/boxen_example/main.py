@@ -74,28 +74,28 @@ def demo() -> None:
     print(f"Created asset id: {membership_token}")
 
     # app_client.call(
-    #     "make_a_box",
-    #     new_member="foo",
-    #     value="3",
+    #     "make_global_box",
+    #     new_member="global_counter",
+    #     value="1",
     #     suggested_params=sp,
-    #     boxes=[(app_client.app_id, "foo")]
+    #     boxes=[(app_client.app_id, "global_counter")]
     # )
     # boxes = app_client.get_box_names()
     # print(f"{len(boxes)} boxes found")
 
 
     # result = app_client.call(
-    #     "read_box",
-    #     member="foo",
-    #     boxes=[(app_client.app_id, "foo")],
+    #     "read_global_box",
+    #     member="global_counter",
+    #     boxes=[(app_client.app_id, "global_counter")],
     # )
     
-    # print(int(str(result.return_value)))
+    # print("Global Counter:" + str(result.return_value))
 
     app_client.call(
-        "set_box",
-        member="foo",
-        value=34,
+        "set_global_box",
+        member="global_counter",
+        value=2,
         suggested_params=sp,
         boxes=[(app_client.app_id, "global_counter")]
     )
@@ -106,60 +106,90 @@ def demo() -> None:
         boxes=[(app_client.app_id, "global_counter")],
     )
 
-    print("Global Counter:" + str(result.return_value))
+    print(result.return_value)
 
-    app_client.call(
-        "increment_global_box",
-        member="global_counter",
-        suggested_params=sp,
-        boxes=[(app_client.app_id, "global_counter")]
-    )
+    # app_client.call(
+    #     "increment_global_box",
+    #     member="global_counter",
+    #     suggested_params=sp,
+    #     boxes=[(app_client.app_id, "global_counter")]
+    # )
 
-    result = app_client.call(
-        "read_global_box",
-        member="global_counter",
-        boxes=[(app_client.app_id, "global_counter")],
-    )
+    # result = app_client.call(
+    #     "read_global_box",
+    #     member="global_counter",
+    #     boxes=[(app_client.app_id, "global_counter")],
+    # )
 
-    print("Global Counter:" + str(result.return_value))
+    # print("Global Counter:" + str(result.return_value))
 
-    app_client.call(
-        "make_local_box",
-        new_member=member_acct.address,
-        value="0",
-        suggested_params=sp,
-        boxes=[(app_client.app_id, decode_address(member_acct.address))]
-    )
-    boxes = app_client.get_box_names()
-    print(f"{len(boxes)} boxes found")
+    # app_client.call(
+    #     "make_local_box",
+    #     new_member=member_acct.address,
+    #     value="0",
+    #     suggested_params=sp,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))]
+    # )
+    # boxes = app_client.get_box_names()
+    # print(f"{len(boxes)} boxes found")
 
 
-    result = app_client.call(
-        "read_local_box",
-        member=member_acct.address,
-        boxes=[(app_client.app_id, decode_address(member_acct.address))],
-    )
+    # result = app_client.call(
+    #     "read_local_box",
+    #     member=member_acct.address,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))],
+    # )
     
-    print("Local Counter:" + str(result.return_value))
+    # print("Local Counter:" + str(result.return_value))
 
-    app_client.call(
-        "set_local_box",
-        member=member_acct.address,
-        value="3",
-        suggested_params=sp,
-        boxes=[(app_client.app_id, decode_address(member_acct.address))]
-    )
+    # app_client.call(
+    #     "set_local_box",
+    #     member=member_acct.address,
+    #     value="3",
+    #     suggested_params=sp,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))]
+    # )
 
-    result = app_client.call(
-        "read_local_box",
-        member=member_acct.address,
-        boxes=[(app_client.app_id, decode_address(member_acct.address))],
-    )
+    # result = app_client.call(
+    #     "read_local_box",
+    #     member=member_acct.address,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))],
+    # )
 
-    print("Local Counter:" + str(result.return_value))
+    # print("Local Counter:" + str(result.return_value))
 
     # app_client.call(
     #     "increment_local_box",
+    #     member=member_acct.address,
+    #     suggested_params=sp,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))]
+    # )
+
+    # result = app_client.call(
+    #     "read_local_box",
+    #     member=member_acct.address,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))],
+    # )
+
+    # print("Local Counter:" + str(result.return_value))
+
+    # app_client.call(
+    #     "decrement_local_box",
+    #     member=member_acct.address,
+    #     suggested_params=sp,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))]
+    # )
+
+    # result = app_client.call(
+    #     "read_local_box",
+    #     member=member_acct.address,
+    #     boxes=[(app_client.app_id, decode_address(member_acct.address))],
+    # )
+
+    # print("Local Counter:" + str(result.return_value))
+
+    # app_client.call(
+    #     "decrement_local_box",
     #     member="foo",
     #     suggested_params=sp,
     #     boxes=[(app_client.app_id, "foo")]

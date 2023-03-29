@@ -72,7 +72,8 @@ class MembershipClubState:
         # Only static types can provide information about the max
         # size (and thus min balance required) - dynamic types will fail at abi.size_of
         self.membership_records = BoxMapping(abi.Address, record_type)
-        self.testboxes = BoxMapping(abi.String, abi.Uint64)
+        self.local_boxes = BoxMapping(abi.Address, abi.String)
+        self.global_boxes = BoxMapping(abi.String, abi.Uint64)
         # Math for determining min balance based on expected size of boxes
         self.max_members = Int(max_members)
 
@@ -104,27 +105,20 @@ def make_global_box(new_member: abi.String, value: abi.String):
     return membership_club_app.state.global_boxes[new_member.get()].set(value.get())
 
 @membership_club_app.external()
-def read_box(member: abi.String,*,output:abi.Uint64):
-    return membership_club_app.state.testboxes[member.get()].store_into(output)
+def make_local_box(new_member: abi.Account, value: abi.String):
+    return membership_club_app.state.local_boxes[new_member.address()].set(value.get())
 
 @membership_club_app.external()
-def set_box(member: abi.String, value: abi.Uint64):
-    return membership_club_app.state.testboxes[member.get()].set(value) # value.get() returns pyteal uint64
-                                                                                # 
-
-# def increment_helper(split):
-#     for x in range(0, len(split)):
-#             if split[x] == "Int":
-#                 print("HEYYEYEYYEYEYEYYEYEYEYE" + (split[x+1]+1))
-#                 return split[x+1] + 1
+def read_global_box(member: abi.String, *,output:abi.Uint64):
+    return membership_club_app.state.global_boxes[member.get()].store_into(output)
 
 @membership_club_app.external()
 def read_local_box(member: abi.Address, *, output:abi.String):
     return output.set(membership_club_app.state.global_boxes[member.get()].get())
 
 @membership_club_app.external()
-def set_global_box(member: abi.String, value: abi.String):
-    return membership_club_app.state.global_boxes[member.get()].set(value.get())
+def set_global_box(member: abi.String, value: abi.Uint64):
+    return membership_club_app.state.global_boxes[member.get()].set(value)
 
 @membership_club_app.external()
 def set_local_box(member: abi.Address, value: abi.String):
@@ -132,17 +126,17 @@ def set_local_box(member: abi.Address, value: abi.String):
 
 @membership_club_app.external()
 def increment_global_box(member: abi.String,*,output:abi.String):
-    return membership_club_app.box_extract(Bytes("global_counter"), Int(4), Int(5))
-    # output.set(membership_club_app.state.global_boxes[member.get()].get())
-    # string = str(output.get())
-    # split = string.split()
-    # number = 0
-    # for x in range(0, len(split)):
-    #     if split[x] == "(Int":
-    #         number = int(split[x+1][0]) + 1
-    #         break
-    # back_to_str = str(number)
-    # return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))
+    # return membership_club_app.box_extract(Bytes("global_counter"), Int(4), Int(5))
+    output.set(membership_club_app.state.global_boxes[member.get()].get())
+    string = str(output.get())
+    split = string.split()
+    number = 0
+    for x in range(0, len(split)):
+        if split[x] == "(Int":
+            number = int(split[x+1][0]) + 1
+            break
+    back_to_str = str(number)
+    return membership_club_app.state.global_boxes[member.get()].set(Bytes(back_to_str))
 
 @membership_club_app.external()
 def decrement_global_box(member: abi.String,*,output:abi.String):
