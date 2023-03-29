@@ -72,8 +72,7 @@ class MembershipClubState:
         # Only static types can provide information about the max
         # size (and thus min balance required) - dynamic types will fail at abi.size_of
         self.membership_records = BoxMapping(abi.Address, record_type)
-        self.local_boxes = BoxMapping(abi.Address, abi.String)
-        self.global_boxes = BoxMapping(abi.String, abi.String)
+        self.testboxes = BoxMapping(abi.String, abi.Uint64)
         # Math for determining min balance based on expected size of boxes
         self.max_members = Int(max_members)
 
@@ -105,12 +104,19 @@ def make_global_box(new_member: abi.String, value: abi.String):
     return membership_club_app.state.global_boxes[new_member.get()].set(value.get())
 
 @membership_club_app.external()
-def make_local_box(new_member: abi.Account, value: abi.String):
-    return membership_club_app.state.local_boxes[new_member.address()].set(value.get())
+def read_box(member: abi.String,*,output:abi.Uint64):
+    return membership_club_app.state.testboxes[member.get()].store_into(output)
 
 @membership_club_app.external()
-def read_global_box(member: abi.String, *,output:abi.String):
-    return output.set(membership_club_app.state.global_boxes[member.get()].get())
+def set_box(member: abi.String, value: abi.Uint64):
+    return membership_club_app.state.testboxes[member.get()].set(value) # value.get() returns pyteal uint64
+                                                                                # 
+
+# def increment_helper(split):
+#     for x in range(0, len(split)):
+#             if split[x] == "Int":
+#                 print("HEYYEYEYYEYEYEYYEYEYEYE" + (split[x+1]+1))
+#                 return split[x+1] + 1
 
 @membership_club_app.external()
 def read_local_box(member: abi.Address, *, output:abi.String):

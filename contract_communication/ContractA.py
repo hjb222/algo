@@ -44,8 +44,8 @@ class DemoA(Application):
                 TxnField.application_args: [Bytes("add"), Int(num1.get()), Int(num2.get())]
             }),
             InnerTxnBuilder.Submit()
-        )
-
+        ) # in order to return value back to user, A has to look at logs from call to B to get return value, then use that as its own return value
+            # need resources to learn how to use logs
     @external
     def sub(self, num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
         return Seq(
