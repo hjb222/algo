@@ -3,6 +3,8 @@ from algosdk.atomic_transaction_composer import TransactionWithSigner
 from algosdk.encoding import decode_address, encode_address
 from algosdk.transaction import AssetOptInTxn, PaymentTxn
 from beaker import *
+from algosdk import *
+from algosdk.atomic_transaction_composer import *
 from beaker import client, consts, sandbox
 from ContractA import (
     contract_a
@@ -26,6 +28,7 @@ def demo() -> None:
     contract_a.create()
     contract_b.create()
     sp = contract_a.get_suggested_params()
+    sp_b = contract_b.get_suggested_params()
 
      ##
     # Bootstrap Club app
@@ -40,6 +43,7 @@ def demo() -> None:
         contract_a.app_addr,
         99999999
     )
+
     contract_a.call(
         "bootstrap",
         seed=TransactionWithSigner(ptxn, acct.signer),
@@ -47,125 +51,19 @@ def demo() -> None:
         boxes=[(contract_a.app_id, "affirmations")] * 8,
     )
 
-    contract_a.call(
-        "make_global_box",
-        new_member="global_counter",
-        value=1,
-        suggested_params=sp,
-        boxes=[(contract_a.app_id, "global_counter")]
+    atc = AtomicTransactionComposer() 
+
+    with open("./ContractB.json") as f:
+        js = f.read()
+    contract = abi.Contract.from_json(js)
+    atc.add_method_call(
+        app_id=contract_b.app_id,
+        # contract_b.get_method_by_name("add")
+        sender=acct.address,
+        sp=sp_b,
+        #signer=contract_a.get_signer(),
+        # how do we get signer?
+        method_args=[1, 1]
     )
-
-
-    result = contract_a.call(
-        "read_global_box",
-        member="global_counter",
-        boxes=[(contract_a.app_id, "global_counter")],
-    )
-    print("Global box created with value: " + str(result.return_value))
-
-    contract_a.call(
-        "set_global_box",
-        member="global_counter",
-        value=8,
-        suggested_params=sp,
-        boxes=[(contract_a.app_id, "global_counter")]
-    )
-
-    result = contract_a.call(
-        "read_global_box",
-        member="global_counter",
-        boxes=[(contract_a.app_id, "global_counter")],
-    )
-    print("Global box set to value: " + str(result.return_value))
-
-    contract_a.call(
-        "increment_global_box",
-        member="global_counter",
-        suggested_params=sp,
-        boxes=[(contract_a.app_id, "global_counter")]
-    )
-
-    result = contract_a.call(
-        "read_global_box",
-        member="global_counter",
-        boxes=[(contract_a.app_id, "global_counter")],
-    )
-    print("Global box inremented to value: " + str(result.return_value))
-
-    contract_a.call(
-        "decrement_global_box",
-        member="global_counter",
-        suggested_params=sp,
-        boxes=[(contract_a.app_id, "global_counter")]
-    )
-
-    result = contract_a.call(
-        "read_global_box",
-        member="global_counter",
-        boxes=[(contract_a.app_id, "global_counter")],
-    )
-    print("Global box decremented to value: " + str(result.return_value))
-
-
-    contract_a.call(
-        "make_local_box",
-        new_member=member_acct.address,
-        value=1,
-        suggested_params=sp,
-        boxes=[(contract_a.app_id, decode_address(member_acct.address))]
-    )
-
-    result = contract_a.call(
-        "read_local_box",
-        member=member_acct.address,
-        boxes=[(contract_a.app_id, decode_address(member_acct.address))],
-    )
-    print("Local box created with value: " + str(result.return_value))
-
-    contract_a.call(
-        "set_local_box",
-        member=member_acct.address,
-        value=4,
-        suggested_params=sp,
-        boxes=[(contract_a.app_id, decode_address(member_acct.address))]
-    )
-
-    result = contract_a.call(
-        "read_local_box",
-        member=member_acct.address,
-        boxes=[(contract_a.app_id, decode_address(member_acct.address))],
-    )
-    print("Local box set to value: " + str(result.return_value))
-
-    contract_a.call(
-        "increment_local_box",
-        member=member_acct.address,
-        suggested_params=sp,
-        boxes=[(contract_a.app_id, decode_address(member_acct.address))]
-    )
-
-    result = contract_a.call(
-        "read_local_box",
-        member=member_acct.address,
-        boxes=[(contract_a.app_id, decode_address(member_acct.address))],
-    )
-
-    print("Local box incremeneted to value: " + str(result.return_value))
-
-    contract_a.call(
-        "decrement_local_box",
-        member=member_acct.address,
-        suggested_params=sp,
-        boxes=[(contract_a.app_id, decode_address(member_acct.address))]
-    )
-
-    result = contract_a.call(
-        "read_local_box",
-        member=member_acct.address,
-        boxes=[(contract_a.app_id, decode_address(member_acct.address))],
-    )
-
-    print("Local box decremented to value: " + str(result.return_value))
-
 if __name__ == "__main__":
     demo()

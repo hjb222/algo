@@ -32,30 +32,30 @@ contract_a = Application(
 
 @contract_a.external()
 def make_global_box(new_member: abi.String, value: abi.Uint64):
-    return contract_b.state.global_boxes[new_member.get()].set(value)
+    return contract_a.state.global_boxes[new_member.get()].set(value)
 
 @contract_a.external()
 def make_local_box(new_member: abi.Account, value: abi.Uint64):
-    return contract_b.state.local_boxes[new_member.address()].set(value)
+    return contract_a.state.local_boxes[new_member.address()].set(value)
 
 @contract_a.external()
 def read_global_box(member: abi.String, *,output:abi.Uint64):
     return contract_b.state.global_boxes[member.get()].store_into(output)
 
 def read_global_box(member: abi.String, *,output:abi.Uint64):
-    return contract_b.state.global_boxes[member.get()].store_into(output)
+    return contract_a.state.global_boxes[member.get()].store_into(output)
 
 @contract_a.external()
 def read_local_box(member: abi.Address, *, output:abi.Uint64):
-    return contract_b.state.global_boxes[member.get()].store_into(output)
+    return contract_a.state.global_boxes[member.get()].store_into(output)
 
 @contract_a.external()
 def set_global_box(member: abi.String, value: abi.Uint64):
-    return contract_b.state.global_boxes[member.get()].set(value)
+    return contract_a.state.global_boxes[member.get()].set(value)
 
 @contract_a.external()
 def set_local_box(member: abi.Address, value: abi.Uint64):
-    return contract_b.state.global_boxes[member.get()].set(value)
+    return contract_a.state.global_boxes[member.get()].set(value)
 
 @contract_a.external()
 def increment_global_box(member: abi.String,*,output:abi.Uint64):
@@ -73,9 +73,9 @@ def decrement_global_box(member: abi.String,*,output:abi.Uint64):
     old_counter = abi.Uint64()
     new_counter = abi.Uint64()
     return Seq(
-            contract_b.state.global_boxes[member.get()].store_into(old_counter),
+            contract_a.state.global_boxes[member.get()].store_into(old_counter),
             new_counter.set(old_counter.get() - Int(1)),
-            contract_b.state.global_boxes[member.get()].set(new_counter),
+            contract_a.state.global_boxes[member.get()].set(new_counter),
             output.set(new_counter),
     )
 
@@ -130,10 +130,6 @@ def bootstrap(
         # membership_club_app.state.membership_token.set(InnerTxn.created_asset_id()),
         # output.set(membership_club_app.state.membership_token),
     )
-
-with open("./ContractB.json") as f:
-    js = f.read()
-contract = abi.Contract.from_json(js)
 
 def is_odd(val:abi.Uint64):
     return If(val%2 != 0, abi.Bool(False), abi.Bool(True))

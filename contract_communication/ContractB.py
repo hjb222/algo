@@ -1,5 +1,6 @@
 from pyteal import *
 from beaker import *
+from pathlib import Path
 import os
 import json
 from typing import Final
@@ -125,21 +126,30 @@ def bootstrap(
         # output.set(membership_club_app.state.membership_token),
     )
     
-@contract_b.external()
-def add(num1: abi.Uint64, num2: abi.Uint64):
-    return Seq(num1 + num2)
+# @contract_b.external()
+# def add(num1: abi.Uint64, num2: abi.Uint64):
+#     return Int(1)
+#     # return Seq(num1 + num2)
 
 
-@contract_b.external
-def sub(num1: abi.Uint64, num2: abi.Uint64):
-    return Seq(num1 - num2)
+# @contract_b.external
+# def sub(num1: abi.Uint64, num2: abi.Uint64):
+#     return Int(1)
+#     # return Seq(num1 - num2)
 
 # @external
 # def pay(self, acct:abi.Uint64):
+def build() -> Path:
+    """Build the beaker app, export it to disk, and return the Path to the app spec file"""
+    app_spec = contract_b.build()
+    output_dir = Path(__file__).parent / "artifacts"
+    print(f"Dumping {app_spec.contract.name} to {output_dir}")
+    app_spec.export(output_dir)
+    return output_dir / "application.json"
 
 if __name__ == "__main__":
     app = ContractB(max_members=100)
-
+    build()
     if os.path.exists("approval.teal"):
         os.remove("approval.teal")
 
