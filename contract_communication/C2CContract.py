@@ -1,5 +1,7 @@
 from pyteal import *
+import pyteal as pt
 from beaker import *
+from typing import Literal
 import os
 import json
 from typing import Final
@@ -12,7 +14,7 @@ global_counter = GlobalStateValue(
         descr="An int as a global counter",
 )
 
-class ContractA:
+class C2CContract:
     def __init__(self, *, max_members: int):
 
         # A Mapping will create a new box for every unique key,
@@ -25,84 +27,84 @@ class ContractA:
         self.max_members = Int(max_members)
 
 
-contract_a = Application(
+app = Application(
     "ContractA",
-    state=ContractA(max_members=1000),
+    state=C2CContract(max_members=1000),
 )
 
-@contract_a.external()
+@app.external()
 def make_global_box(new_member: abi.String, value: abi.Uint64):
-    return contract_a.state.global_boxes[new_member.get()].set(value)
+    return app.state.global_boxes[new_member.get()].set(value)
 
-@contract_a.external()
+@app.external()
 def make_local_box(new_member: abi.Account, value: abi.Uint64):
-    return contract_a.state.local_boxes[new_member.address()].set(value)
+    return app.state.local_boxes[new_member.address()].set(value)
 
-@contract_a.external()
+@app.external()
 def read_global_box(member: abi.String, *,output:abi.Uint64):
-    return contract_b.state.global_boxes[member.get()].store_into(output)
+    return app.state.global_boxes[member.get()].store_into(output)
 
 def read_global_box(member: abi.String, *,output:abi.Uint64):
-    return contract_a.state.global_boxes[member.get()].store_into(output)
+    return app.state.global_boxes[member.get()].store_into(output)
 
-@contract_a.external()
+@app.external()
 def read_local_box(member: abi.Address, *, output:abi.Uint64):
-    return contract_a.state.global_boxes[member.get()].store_into(output)
+    return app.state.global_boxes[member.get()].store_into(output)
 
-@contract_a.external()
+@app.external()
 def set_global_box(member: abi.String, value: abi.Uint64):
-    return contract_a.state.global_boxes[member.get()].set(value)
+    return app.state.global_boxes[member.get()].set(value)
 
-@contract_a.external()
+@app.external()
 def set_local_box(member: abi.Address, value: abi.Uint64):
-    return contract_a.state.global_boxes[member.get()].set(value)
+    return app.state.global_boxes[member.get()].set(value)
 
-@contract_a.external()
+@app.external()
 def increment_global_box(member: abi.String,*,output:abi.Uint64):
     old_counter = abi.Uint64()
     new_counter = abi.Uint64()
     return Seq(
-            contract_a.state.global_boxes[member.get()].store_into(old_counter),
+            app.state.global_boxes[member.get()].store_into(old_counter),
             new_counter.set(old_counter.get() + Int(1)),
-            contract_a.state.global_boxes[member.get()].set(new_counter),
+            app.state.global_boxes[member.get()].set(new_counter),
             output.set(new_counter),
     )
 
-@contract_a.external()
+@app.external()
 def decrement_global_box(member: abi.String,*,output:abi.Uint64):
     old_counter = abi.Uint64()
     new_counter = abi.Uint64()
     return Seq(
-            contract_a.state.global_boxes[member.get()].store_into(old_counter),
+            app.state.global_boxes[member.get()].store_into(old_counter),
             new_counter.set(old_counter.get() - Int(1)),
-            contract_a.state.global_boxes[member.get()].set(new_counter),
+            app.state.global_boxes[member.get()].set(new_counter),
             output.set(new_counter),
     )
 
-@contract_a.external()
+@app.external()
 def increment_local_box(member: abi.Address,*,output:abi.Uint64):
     old_counter = abi.Uint64()
     new_counter = abi.Uint64()
     return Seq(
-            contract_a.state.global_boxes[member.get()].store_into(old_counter),
+            app.state.global_boxes[member.get()].store_into(old_counter),
             new_counter.set(old_counter.get() + Int(1)),
-            contract_a.state.global_boxes[member.get()].set(new_counter),
+            app.state.global_boxes[member.get()].set(new_counter),
             output.set(new_counter),
     )
 
-@contract_a.external()
+@app.external()
 def decrement_local_box(member: abi.Address,*,output:abi.Uint64):
     old_counter = abi.Uint64()
     new_counter = abi.Uint64()
     return Seq(
-            contract_a.state.global_boxes[member.get()].store_into(old_counter),
+            app.state.global_boxes[member.get()].store_into(old_counter),
             new_counter.set(old_counter.get() - Int(1)),
-            contract_a.state.global_boxes[member.get()].set(new_counter),
+            app.state.global_boxes[member.get()].set(new_counter),
             output.set(new_counter),
     )
 
 
-@contract_a.external(authorize=Authorize.only(Global.creator_address()))
+@app.external(authorize=Authorize.only(Global.creator_address()))
 def bootstrap(
     seed: abi.PaymentTransaction,
     token_name: abi.String,
@@ -118,7 +120,7 @@ def bootstrap(
             {
                 TxnField.type_enum: TxnType.AssetConfig,
                 TxnField.config_asset_name: token_name.get(),
-                TxnField.config_asset_total: contract_a.state.max_members,
+                TxnField.config_asset_total: app.state.max_members,
                 TxnField.config_asset_default_frozen: Int(1),
                 TxnField.config_asset_manager: Global.current_application_address(),
                 TxnField.config_asset_clawback: Global.current_application_address(),
@@ -134,29 +136,64 @@ def bootstrap(
 def is_odd(val:abi.Uint64):
     return If(val%2 != 0, abi.Bool(False), abi.Bool(True))
 
+@app.external()
+def perform_add(num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
+    return output.set(num1.get() + num2.get())
+
+@app.external()
+def perform_sub(num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
+    return output.set(num1.get() - num2.get())
+
+@app.external()
+def perform_mul(num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
+    return output.set(num1.get() * num2.get())
+
+@app.external()
+def perform_div(num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
+    return output.set(num1.get() / num2.get())
 # https://forum.algorand.org/t/calling-function-of-another-contract-in-current-contract/7571
-@contract_a.external()
-def add(num1: abi.Uint64, num2: abi.Uint64, app_id: abi.Uint64, *, output: abi.Uint64):
+@app.external()
+def add(num1: abi.Uint64, num2: abi.Uint64, app: abi.Application, *, output: abi.String) -> Expr:
     return Seq(
-        InnerTxnBuilder.Begin(),
-        InnerTxnBuilder.SetFields({
-            TxnField.type_enum: TxnType.ApplicationCall,
-            TxnField.application_id: app_id,
-            TxnField.on_completion: OnComplete.NoOp,
-            TxnField.application_args: [Bytes("add"), num1, num2]
-        }),
-        InnerTxnBuilder.Submit()
+        InnerTxnBuilder.ExecuteMethodCall(
+            app_id=app.application_id(),
+            method_signature=perform_add.method_signature(),
+            args=[num1, num2],
+            extra_fields={
+                # Set the fee to 0 so we don't have to
+                # fund the app account. We'll have to cover
+                # the fee ourselves when we call this method
+                # from off chain
+                TxnField.fee: Int(0),
+            },
+        ),
+        output.set(Suffix(InnerTxn.last_log(), Int(4))),
     ) # in order to return value back to user, A has to look at logs from call to B to get return value, then use that as its own return value
-    
-@contract_a.external()
-def sub(num1: abi.Uint64, num2: abi.Uint64, app_id: abi.Uint64, *, output: abi.Uint64):
-    return Seq(
-        InnerTxnBuilder.Begin(),
-        InnerTxnBuilder.SetFields({
-            TxnField.type_enum: TxnType.ApplicationCall,
-            TxnField.application_id: app_id,
-            TxnField.on_completion: OnComplete.NoOp,
-            TxnField.application_args: [Bytes("sub"), num1, num2]
+
+@app.external
+def call_calc_method(
+    fn_selector: pt.abi.StaticBytes[Literal[4]], # method selector 
+    num1: pt.abi.Uint64,
+    num2: pt.abi.Uint64,
+    other_app: pt.abi.Application,
+    *,
+    output: pt.abi.Uint64,
+) -> pt.Expr:
+    return pt.Seq(
+        # call other app method, specified by fn
+        # pass args a and b
+
+        pt.InnerTxnBuilder.Begin(),
+        pt.InnerTxnBuilder.SetFields({
+            pt.TxnField.type_enum: pt.TxnType.ApplicationCall,
+            pt.TxnField.application_id: other_app.application_id(),
+            pt.TxnField.application_args: [
+                fn_selector.encode(),
+                num1.encode(),
+                num2.encode(),
+            ],
+            pt.TxnField.fee: pt.Int(0),
         }),
-        InnerTxnBuilder.Submit()
+        pt.InnerTxnBuilder.Submit(),
+        output.decode(pt.Suffix(pt.InnerTxn.last_log(), pt.Int(4)))
     )
