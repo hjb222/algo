@@ -9,9 +9,9 @@ from beaker.consts import ASSET_MIN_BALANCE, BOX_BYTE_MIN_BALANCE, BOX_FLAT_MIN_
 from beaker.lib.storage import BoxMapping
 
 global_counter = GlobalStateValue(
-        TealType.uint64,
-        default=Int(1),
-        descr="An int as a global counter",
+    TealType.uint64,
+    default=Int(1),
+    descr="An int as a global counter",
 )
 
 class C2CContract:
@@ -28,7 +28,7 @@ class C2CContract:
 
 
 app = Application(
-    "ContractA",
+    "C2CContract",
     state=C2CContract(max_members=1000),
 )
 
@@ -133,42 +133,30 @@ def bootstrap(
         # output.set(membership_club_app.state.membership_token),
     )
 
-def is_odd(val:abi.Uint64):
-    return If(val%2 != 0, abi.Bool(False), abi.Bool(True))
+def is_odd(val:abi.Uint64) -> Expr:
+    result = abi.Uint64()
+    result.set(Mod(val.get(), Int(2)))
+    return If(result.get() == Int(0), Int(1), Int(0))
 
-@app.external()
-def perform_add(num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
-    return output.set(num1.get() + num2.get())
-
-@app.external()
-def perform_sub(num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
-    return output.set(num1.get() - num2.get())
-
-@app.external()
-def perform_mul(num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
-    return output.set(num1.get() * num2.get())
-
-@app.external()
-def perform_div(num1: abi.Uint64, num2: abi.Uint64, *, output: abi.Uint64):
-    return output.set(num1.get() / num2.get())
-# https://forum.algorand.org/t/calling-function-of-another-contract-in-current-contract/7571
-@app.external()
-def add(num1: abi.Uint64, num2: abi.Uint64, app: abi.Application, *, output: abi.String) -> Expr:
-    return Seq(
-        InnerTxnBuilder.ExecuteMethodCall(
-            app_id=app.application_id(),
-            method_signature=perform_add.method_signature(),
-            args=[num1, num2],
-            extra_fields={
-                # Set the fee to 0 so we don't have to
-                # fund the app account. We'll have to cover
-                # the fee ourselves when we call this method
-                # from off chain
-                TxnField.fee: Int(0),
-            },
-        ),
-        output.set(Suffix(InnerTxn.last_log(), Int(4))),
-    ) # in order to return value back to user, A has to look at logs from call to B to get return value, then use that as its own return value
+# # https://forum.algorand.org/t/calling-function-of-another-contract-in-current-contract/7571
+# @app.external()
+# def add(num1: abi.Uint64, num2: abi.Uint64, app: abi.Application, *, output: abi.String) -> Expr:
+#     return Seq(
+#         InnerTxnBuilder.ExecuteMethodCall(
+#             app_id=app.application_id(),
+#             method_signature=perform_add.method_signature(),
+#             args=[num1, num2],
+#             extra_fields={
+#                 # Set the fee to 0 so we don't have to
+#                 # fund the app account. We'll have to cover
+#                 # the fee ourselves when we call this method
+#                 # from off chain
+#                 TxnField.fee: Int(0),
+#             },
+#         ),
+#         output.set(Suffix(InnerTxn.last_log(), Int(4))),
+#     ) # in order to return value back to user, A has to look at logs from call to B to get return value, then use that as its own return value
+# print(is_odd(1))
 
 @app.external
 def call_calc_method(
@@ -195,5 +183,5 @@ def call_calc_method(
             pt.TxnField.fee: pt.Int(0),
         }),
         pt.InnerTxnBuilder.Submit(),
-        output.decode(pt.Suffix(pt.InnerTxn.last_log(), pt.Int(4)))
+        output.decode(pt.Suffix(pt.InnerTxn.last_log(), pt.Int(4))),
     )

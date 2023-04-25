@@ -1,4 +1,5 @@
 import C2CContract
+import SecondaryContract
 import beaker
 from algosdk.atomic_transaction_composer import TransactionWithSigner
 from algosdk.transaction import PaymentTxn
@@ -18,7 +19,7 @@ def demo() -> None:
 
     second_app_client = beaker.client.ApplicationClient(
         algod_client,
-        C2CContract.app,
+        SecondaryContract.app,
         signer=account.signer,
     )
 
@@ -105,9 +106,9 @@ def demo() -> None:
 
     result = first_app_client.call(
         C2CContract.call_calc_method,
-        fn_selector=C2CContract.perform_add.method_spec().get_selector(),
-        num1=2,
-        num2=3,
+        fn_selector=SecondaryContract.perform_add.method_spec().get_selector(),
+        num1=3,
+        num2=2,
         other_app=second_app_client.app_id, 
         suggested_params=sp,
     )
@@ -115,7 +116,7 @@ def demo() -> None:
 
     result = first_app_client.call(
         C2CContract.call_calc_method,
-        fn_selector=C2CContract.perform_sub.method_spec().get_selector(),
+        fn_selector=SecondaryContract.perform_sub.method_spec().get_selector(),
         num1=5,
         num2=2,
         other_app=second_app_client.app_id, 
@@ -125,7 +126,7 @@ def demo() -> None:
 
     result = first_app_client.call(
         C2CContract.call_calc_method,
-        fn_selector=C2CContract.perform_mul.method_spec().get_selector(),
+        fn_selector=SecondaryContract.perform_mul.method_spec().get_selector(),
         num1=2,
         num2=3,
         other_app=second_app_client.app_id, 
@@ -135,7 +136,7 @@ def demo() -> None:
 
     result = first_app_client.call(
         C2CContract.call_calc_method,
-        fn_selector=C2CContract.perform_div.method_spec().get_selector(),
+        fn_selector=SecondaryContract.perform_div.method_spec().get_selector(),
         num1=4,
         num2=2,
         other_app=second_app_client.app_id, 
