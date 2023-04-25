@@ -2,17 +2,9 @@ from pyteal import *
 import pyteal as pt
 from beaker import *
 from typing import Literal
-import os
-import json
 from typing import Final
 from beaker.consts import ASSET_MIN_BALANCE, BOX_BYTE_MIN_BALANCE, BOX_FLAT_MIN_BALANCE
 from beaker.lib.storage import BoxMapping
-
-global_counter = GlobalStateValue(
-    TealType.uint64,
-    default=Int(1),
-    descr="An int as a global counter",
-)
 
 class C2CContract:
     def __init__(self, *, max_members: int):
@@ -31,6 +23,11 @@ app = Application(
     "C2CContract",
     state=C2CContract(max_members=1000),
 )
+
+@app.opt_in()
+def opt_in():
+    return app.initialize_global_state()
+
 
 @app.external()
 def make_global_box(new_member: abi.String, value: abi.Uint64):
@@ -115,7 +112,6 @@ def bootstrap(
             seed.get().receiver() == Global.current_application_address(),
             comment="payment must be to app address",
         ),
-        #Pop(membership_club_app.state.affirmations.create()),
         InnerTxnBuilder.Execute(
             {
                 TxnField.type_enum: TxnType.AssetConfig,
@@ -129,34 +125,19 @@ def bootstrap(
                 TxnField.fee: Int(0),
             }
         ),
-        # membership_club_app.state.membership_token.set(InnerTxn.created_asset_id()),
-        # output.set(membership_club_app.state.membership_token),
     )
 
-def is_odd(val:abi.Uint64) -> Expr:
-    result = abi.Uint64()
-    result.set(Mod(val.get(), Int(2)))
-    return If(result.get() == Int(0), Int(1), Int(0))
 
-# # https://forum.algorand.org/t/calling-function-of-another-contract-in-current-contract/7571
-# @app.external()
-# def add(num1: abi.Uint64, num2: abi.Uint64, app: abi.Application, *, output: abi.String) -> Expr:
-#     return Seq(
-#         InnerTxnBuilder.ExecuteMethodCall(
-#             app_id=app.application_id(),
-#             method_signature=perform_add.method_signature(),
-#             args=[num1, num2],
-#             extra_fields={
-#                 # Set the fee to 0 so we don't have to
-#                 # fund the app account. We'll have to cover
-#                 # the fee ourselves when we call this method
-#                 # from off chain
-#                 TxnField.fee: Int(0),
-#             },
-#         ),
-#         output.set(Suffix(InnerTxn.last_log(), Int(4))),
-#     ) # in order to return value back to user, A has to look at logs from call to B to get return value, then use that as its own return value
-# print(is_odd(1))
+# https://forum.algorand.org/t/calling-function-of-another-contract-in-current-contract/7571
+
+def increment_global():
+    old_counter = abi.Uint64()
+    new_counter = abi.Uint64()
+    return Seq(
+            app.state.global_boxes[Bytes("global_counter")].store_into(old_counter),
+            new_counter.set(old_counter.get() + Int(1)),
+            app.state.global_boxes[Bytes("global_counter")].set(new_counter),
+    )
 
 @app.external
 def call_calc_method(
@@ -184,4 +165,5 @@ def call_calc_method(
         }),
         pt.InnerTxnBuilder.Submit(),
         output.decode(pt.Suffix(pt.InnerTxn.last_log(), pt.Int(4))),
+        increment_global()
     )

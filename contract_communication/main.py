@@ -104,45 +104,59 @@ def demo() -> None:
     )
     print("Global box decremented to value: " + str(result.return_value))
 
+    first_num = 4
+    second_num = 2
+
     result = first_app_client.call(
         C2CContract.call_calc_method,
         fn_selector=SecondaryContract.perform_add.method_spec().get_selector(),
-        num1=3,
-        num2=2,
+        num1=first_num,
+        num2=second_num,
         other_app=second_app_client.app_id, 
         suggested_params=sp,
+        boxes=[(first_app_client.app_id, "global_counter")],
     )
-    print(result.return_value)
+    print(str(first_num) + " + " + str(second_num) + " = "+str(result.return_value))
 
     result = first_app_client.call(
         C2CContract.call_calc_method,
         fn_selector=SecondaryContract.perform_sub.method_spec().get_selector(),
-        num1=5,
-        num2=2,
+        num1=first_num,
+        num2=second_num,
         other_app=second_app_client.app_id, 
         suggested_params=sp,
+        boxes=[(first_app_client.app_id, "global_counter")],
     )
-    print(result.return_value)
+    print(str(first_num) + " - " + str(second_num) + " = "+str(result.return_value))
 
     result = first_app_client.call(
         C2CContract.call_calc_method,
         fn_selector=SecondaryContract.perform_mul.method_spec().get_selector(),
-        num1=2,
-        num2=3,
+        num1=first_num,
+        num2=second_num,
         other_app=second_app_client.app_id, 
         suggested_params=sp,
+        boxes=[(first_app_client.app_id, "global_counter")],
     )
-    print(result.return_value)
+    print(str(first_num) + " * " + str(second_num) + " = "+str(result.return_value))
 
     result = first_app_client.call(
         C2CContract.call_calc_method,
         fn_selector=SecondaryContract.perform_div.method_spec().get_selector(),
-        num1=4,
-        num2=2,
+        num1=first_num,
+        num2=second_num,
         other_app=second_app_client.app_id, 
         suggested_params=sp,
+        boxes=[(first_app_client.app_id, "global_counter")],
     )
-    print(result.return_value)
+    print(str(first_num) + " / " + str(second_num) + " = "+str(result.return_value))
+
+    result = first_app_client.call(
+        "read_global_box",
+        member="global_counter",
+        boxes=[(first_app_client.app_id, "global_counter")],
+    )
+    print("Global box now reads after calculator calls: " + str(result.return_value))
 
 if __name__ == "__main__":
     demo()
